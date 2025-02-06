@@ -22,8 +22,14 @@ jobs:
           docker save myapp -o myapp.tar
 
       - name: Copy Docker image to VPS using SCP with Password
-        run: |
-          sshpass -p "${{ secrets.VPS_PASSWORD }}" scp -o StrictHostKeyChecking=no myapp.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/myapp.tar
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: ${{ secrets.PORT }}
+          source: "myapp.tar"
+          target: "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/myapp.tar"
 
       - name: Deploy on VPS using SSH with Password
         run: |
