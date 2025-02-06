@@ -23,7 +23,7 @@ jobs:
 
       - name: Copy Docker image to VPS using SCP with Password
         run: |
-          sshpass -p "${{ secrets.VPS_PASSWORD }}" scp -o StrictHostKeyChecking=no myapp.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" scp -o StrictHostKeyChecking=no myapp.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/myapp.tar
 
       - name: Deploy on VPS using SSH with Password
         run: |
