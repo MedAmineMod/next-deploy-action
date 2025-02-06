@@ -1,0 +1,37 @@
+name: Deploy to VPS without Docker Hub
+
+on:
+  push:
+    branches:
+      - main  # Adjust as needed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t myapp:latest .
+
+      - name: Save Docker image as a tar file
+        run: |
+          docker save myapp:latest -o myapp.tar
+
+      - name: Copy Docker image to VPS using SCP with Password
+        run: |
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" scp -o StrictHostKeyChecking=no myapp.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/
+
+      - name: Deploy on VPS using SSH with Password
+        run: |
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+            docker stop myapp || true
+            docker rm myapp || true
+            docker load -i /home/${{ secrets.VPS_USER }}/myapp.tar
+            docker run -d --name myapp -p 80:3000 --restart always myapp:latest
+            rm /home/${{ secrets.VPS_USER }}/myapp.tar  # Clean up
+          EOF
+
